@@ -15,11 +15,6 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Debug temporal
-        \Log::info('Dashboard - Usuario autenticado:', [
-            'user' => auth()->user(),
-            'check' => auth()->check(),
-        ]);
         
         // Métricas principales
         $metricas = $this->obtenerMetricasPrincipales();

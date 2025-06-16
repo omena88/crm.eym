@@ -19,11 +19,7 @@ import {
 const showingNavigationDropdown = ref(false);
 const page = usePage();
 
-// Debug temporal - eliminar después de resolver el problema
-console.log('AuthenticatedLayout - Props completos:', page.props);
-console.log('AuthenticatedLayout - Props de autenticación:', page.props.auth);
-console.log('AuthenticatedLayout - Usuario:', page.props.auth?.user);
-console.log('AuthenticatedLayout - Condición evaluada:', !!(page.props.auth && page.props.auth.user));
+// Componente funcional - layout de autenticación
 
 // Función para cerrar el menú móvil
 const closeNavigation = () => {
