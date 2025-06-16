@@ -1,185 +1,195 @@
 # CRM EYM - Sistema de Gestión de Relaciones con Clientes
 
-Un sistema CRM completo desarrollado con **Laravel 11**, **Vue 3**, **Radix Vue** y **Tailwind CSS**.
+Un sistema CRM completo desarrollado con Laravel 11 y Vue.js 3, utilizando Inertia.js para una experiencia de aplicación de página única (SPA).
 
 ## 🚀 Características
 
-- **Gestión de Clientes**: CRUD completo con filtros avanzados
-- **Sistema de Contactos**: Múltiples contactos por cliente con contacto principal
-- **Gestión de Visitas**: Programación, seguimiento y gestión de estados
-- **Dashboard Interactivo**: Métricas en tiempo real y gráficos
-- **Sistema de Emails**: Notificaciones y templates personalizables
-- **Autenticación**: Sistema completo con Laravel Breeze
-- **Responsive**: Diseño moderno y adaptable
+### Dashboard Interactivo
+- Métricas de ventas en tiempo real
+- Gráficos de desempeño de visitas (planificadas vs realizadas)
+- Alertas y notificaciones inteligentes
+- Panel de acciones rápidas
 
-## 🛠️ Stack Tecnológico
+### Gestión de Clientes
+- CRUD completo de clientes
+- Búsqueda y filtrado avanzado
+- Exportación e importación de datos
+- Estados de cliente (Pendiente, Visitado, Cotizado, etc.)
+- Sectores industriales personalizables
+
+### Gestión de Contactos
+- Múltiples contactos por cliente
+- Designación de contacto principal
+- Información completa (email, teléfono, puesto)
+
+### Sistema de Visitas
+- Planificación semanal de visitas
+- Estados: Pendiente, Programada, Realizada, Cancelada
+- Tipos: Comercial, Técnica, Seguimiento, Postventa
+- Sistema de aprobación por roles
+
+### Control de Acceso por Roles
+- **Administrador**: Acceso completo al sistema
+- **Gerente**: Supervisión y aprobación de visitas
+- **Vendedor**: Gestión de clientes y planificación de visitas
+
+## 🛠️ Tecnologías Utilizadas
 
 - **Backend**: Laravel 11
-- **Frontend**: Vue 3 + Composition API
-- **UI Components**: Radix Vue
+- **Frontend**: Vue.js 3 + Inertia.js
 - **Estilos**: Tailwind CSS
-- **Base de Datos**: MySQL
+- **Base de Datos**: SQLite (configurable)
 - **Autenticación**: Laravel Breeze
-- **Iconos**: Lucide Vue
+- **Iconos**: Heroicons
 
-## 📋 Requisitos
+## 📋 Requisitos del Sistema
 
-- PHP 8.2 o superior
+- PHP >= 8.2
 - Composer
-- Node.js 18 o superior
-- MySQL 8.0 o superior
+- Node.js >= 18
+- NPM o Yarn
 
-## ⚡ Instalación
+## 🔧 Instalación
 
-1. **Clonar el repositorio**
+### 1. Clonar el repositorio
 ```bash
-git clone <repository-url>
-cd crm-eym
+git clone https://github.com/omena88/crm.eym.git
+cd crm.eym
 ```
 
-2. **Instalar dependencias PHP**
+### 2. Instalar dependencias de PHP
 ```bash
 composer install
 ```
 
-3. **Instalar dependencias Node.js**
+### 3. Instalar dependencias de Node.js
 ```bash
 npm install
 ```
 
-4. **Configurar base de datos**
-- Crear base de datos `crm_eym` en MySQL
-- Configurar credenciales en `.env`
-
-5. **Ejecutar migraciones y seeders**
+### 4. Configuración del entorno
 ```bash
-php artisan migrate --seed
-```
+# Copiar archivo de configuración
+cp .env.example .env
 
-6. **Generar clave de aplicación**
-```bash
+# Generar clave de aplicación
 php artisan key:generate
 ```
 
-7. **Compilar assets**
-```bash
-npm run build
-# o para desarrollo
-npm run dev
+### 5. Configurar base de datos
+Edita el archivo `.env` con tu configuración de base de datos:
+```env
+DB_CONNECTION=sqlite
+DB_DATABASE=/absolute/path/to/database.sqlite
 ```
 
-8. **Servir la aplicación**
+### 6. Ejecutar migraciones y seeders
+```bash
+# Crear base de datos y ejecutar migraciones
+php artisan migrate
+
+# Llenar con datos de ejemplo
+php artisan db:seed
+```
+
+### 7. Compilar assets
+```bash
+# Desarrollo
+npm run dev
+
+# Producción
+npm run build
+```
+
+### 8. Iniciar servidor
 ```bash
 php artisan serve
 ```
 
 ## 👥 Usuarios de Prueba
 
-El sistema incluye datos de prueba con los siguientes usuarios:
+Después de ejecutar los seeders, tendrás estos usuarios disponibles:
 
-- **Admin**: admin@crm.local / password123
-- **Usuario 1**: juan.perez@crm.local / password123
-- **Usuario 2**: maria.rodriguez@crm.local / password123
-- **Usuario 3**: carlos.mendez@crm.local / password123
+| Email | Contraseña | Rol |
+|-------|------------|-----|
+| admin@crm.com | password | Administrador |
+| gerente@crm.com | password | Gerente |
+| vendedor@crm.com | password | Vendedor |
 
-## 📊 Datos de Prueba
+## 📱 Uso del Sistema
 
-- **8 Clientes** diversos con diferentes sectores y tamaños
-- **12 Contactos** vinculados con contactos principales
-- **9 Visitas** en diferentes estados (programadas, realizadas, canceladas)
+### Para Vendedores
+1. **Gestionar Clientes**: Crear, editar y administrar información de clientes
+2. **Planificar Visitas**: Organizar visitas semanales y enviar para aprobación
+3. **Registrar Resultados**: Marcar visitas como realizadas con comentarios
+
+### Para Gerentes
+1. **Supervisar Ventas**: Revisar métricas y desempeño del equipo
+2. **Aprobar Visitas**: Validar planificaciones semanales de vendedores
+3. **Analizar Datos**: Acceder a reportes y estadísticas avanzadas
+
+### Para Administradores
+1. **Gestión Completa**: Acceso total a todas las funcionalidades
+2. **Administrar Usuarios**: Crear y gestionar cuentas de usuarios
+3. **Configuración**: Personalizar categorías y estados del sistema
 
 ## 🗂️ Estructura del Proyecto
 
 ```
 crm-eym/
 ├── app/
-│   ├── Http/Controllers/     # Controladores
-│   └── Models/              # Modelos Eloquent
+│   ├── Http/Controllers/          # Controladores
+│   ├── Models/                    # Modelos Eloquent
+│   └── Http/Middleware/           # Middleware personalizado
 ├── database/
-│   ├── migrations/          # Migraciones
-│   └── seeders/            # Seeders con datos de prueba
+│   ├── migrations/                # Migraciones de base de datos
+│   └── seeders/                   # Datos de prueba
 ├── resources/
-│   ├── js/                 # Vue.js components
-│   └── views/              # Blade templates
-└── routes/
-    └── web.php             # Rutas web
+│   ├── js/
+│   │   ├── Components/            # Componentes Vue reutilizables
+│   │   ├── Layouts/               # Layouts de la aplicación
+│   │   └── Pages/                 # Páginas Vue/Inertia
+│   └── css/                       # Estilos Tailwind
+└── routes/                        # Rutas de la aplicación
 ```
 
-## 🚀 Funcionalidades
+## 🚀 Despliegue
 
-### Dashboard
-- Métricas de clientes, visitas y pipeline
-- Gráficos de tendencias
-- Actividades recientes
-- Alertas y notificaciones
+Para producción, asegúrate de:
 
-### Gestión de Clientes
-- CRUD completo
-- Filtros por estado, sector, tamaño
-- Búsqueda avanzada
-- Estadísticas por cliente
+1. **Configurar variables de entorno de producción**:
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_URL=https://tu-dominio.com
+```
 
-### Sistema de Contactos
-- Múltiples contactos por cliente
-- Gestión de contacto principal automática
-- Información completa de contacto
-
-### Gestión de Visitas
-- Programación de visitas
-- Estados: Programada, realizada, cancelada, vencida
-- Filtros por fecha, tipo, prioridad
-- Seguimiento de objetivos
-
-### Sistema de Emails
-- Templates predefinidos
-- Emails personalizados
-- Verificación de configuración
-- Notificaciones automáticas
-
-## 🎨 Diseño
-
-El sistema utiliza un diseño moderno y limpio con:
-- Interfaz responsive
-- Componentes reutilizables
-- Paleta de colores consistente
-- UX optimizada para productividad
-
-## 📱 Compatibilidad
-
-- ✅ Desktop (Chrome, Firefox, Safari, Edge)
-- ✅ Tablet
-- ✅ Mobile
-
-## 🔧 Desarrollo
-
-Para desarrollo local:
-
+2. **Optimizar para producción**:
 ```bash
-# Terminal 1: Backend
-php artisan serve
-
-# Terminal 2: Frontend (hot reload)
-npm run dev
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+npm run build
 ```
+
+3. **Configurar servidor web** (Apache/Nginx) para apuntar a la carpeta `public/`
+
+## 🤝 Contribuir
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/nueva-funcionalidad`)
+3. Commit tus cambios (`git commit -am 'Agregar nueva funcionalidad'`)
+4. Push a la rama (`git push origin feature/nueva-funcionalidad`)
+5. Abre un Pull Request
 
 ## 📄 Licencia
 
-Este proyecto está bajo la Licencia MIT.
-
-## 🤝 Contribución
-
-Las contribuciones son bienvenidas. Por favor:
-
-1. Fork el proyecto
-2. Crea una rama para tu feature
-3. Commit tus cambios
-4. Push a la rama
-5. Abre un Pull Request
+Este proyecto está bajo la licencia [MIT](LICENSE).
 
 ## 📞 Soporte
 
-Para soporte técnico o preguntas, contacta al equipo de desarrollo.
+Para soporte o preguntas, abre un [issue](https://github.com/omena88/crm.eym/issues) en GitHub.
 
 ---
 
-**CRM EYM** - Sistema completo de gestión de relaciones con clientes. 
+**Desarrollado con ❤️ usando Laravel y Vue.js** 
