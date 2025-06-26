@@ -26,10 +26,7 @@ export default defineConfig({
     build: {
         rollupOptions: {
             output: {
-                manualChunks: {
-                    vendor: ['vue', '@inertiajs/vue3'],
-                    heroicons: ['@heroicons/vue/24/outline', '@heroicons/vue/24/solid']
-                }
+                manualChunks: undefined
             }
         }
     }

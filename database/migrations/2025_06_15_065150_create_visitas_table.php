@@ -14,22 +14,33 @@ return new class extends Migration
         Schema::create('visitas', function (Blueprint $table) {
             $table->id();
             $table->foreignId('cliente_id')->constrained('clientes')->onDelete('cascade');
-            $table->foreignId('vendedor_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('gerente_id')->nullable()->constrained('users')->onDelete('set null');
             
             $table->string('titulo');
             $table->text('descripcion')->nullable();
             $table->text('objetivos')->nullable();
             
-            $table->date('fecha_planificada');
+            $table->date('fecha_programada');
             $table->time('hora_planificada')->nullable();
             $table->integer('duracion_estimada')->default(60); // minutos
+            $table->integer('duracion_real')->nullable(); // minutos reales
             
-            $table->enum('tipo', ['planificada', 'no_planificada'])->default('planificada');
-            $table->enum('estado', ['pendiente', 'aprobada', 'rechazada', 'completada', 'cancelada'])->default('pendiente');
+            $table->enum('tipo', ['comercial', 'tecnica', 'seguimiento', 'postventa'])->default('comercial');
+            $table->enum('estado', ['pendiente', 'programada', 'aprobada', 'realizada', 'cancelada'])->default('pendiente');
+            $table->enum('prioridad', ['baja', 'media', 'alta', 'urgente'])->default('media');
             
             // Datos de la visita realizada
             $table->datetime('fecha_realizada')->nullable();
+            $table->text('resultado')->nullable(); // resultado de la visita
+            $table->text('notas')->nullable(); // comentarios del vendedor
+            $table->text('comentarios')->nullable(); // comentarios adicionales
+            $table->integer('satisfaccion_cliente')->nullable(); // 1-10
+            $table->boolean('objetivos_alcanzados')->default(false);
+            $table->boolean('requiere_seguimiento')->default(false);
+            $table->date('fecha_siguiente_contacto')->nullable();
+            
+            // Compatibilidad legacy
             $table->text('resumen_visita')->nullable();
             $table->text('acuerdos')->nullable();
             $table->text('proximos_pasos')->nullable();
@@ -48,7 +59,7 @@ return new class extends Migration
             $table->timestamps();
             
             // Índices
-            $table->index(['vendedor_id', 'fecha_planificada']);
+            $table->index(['user_id', 'fecha_programada']);
             $table->index(['estado', 'tipo']);
             $table->index(['semana', 'año']);
         });

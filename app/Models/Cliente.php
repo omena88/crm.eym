@@ -6,59 +6,45 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Cliente extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'codigo',
+        'user_id',
         'ruc',
         'razon_social',
+        'nombre_comercial',
         'sector',
         'estado',
         'notas',
         'telefono',
         'website',
         'direccion',
-        'tamaño',
         'valor_potencial',
         'probabilidad_cierre',
-        'etiquetas',
-        'fecha_ultimo_contacto',
+        'ultima_actividad',
     ];
 
     protected $casts = [
-        'etiquetas' => 'array',
-        'fecha_ultimo_contacto' => 'datetime',
+        'ultima_actividad' => 'datetime',
         'valor_potencial' => 'decimal:2',
     ];
 
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($cliente) {
-            if (empty($cliente->codigo)) {
-                $cliente->codigo = self::generateNextCode();
-            }
-        });
-    }
-
-    public static function generateNextCode(): string
-    {
-        $lastCliente = self::orderBy('id', 'desc')->first();
-        $nextNumber = $lastCliente ? (int) substr($lastCliente->codigo, 4) + 1 : 1;
-        return 'EMP-' . str_pad($nextNumber, 6, '0', STR_PAD_LEFT);
-    }
-
     // Relaciones
+    public function vendedor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function contactos(): HasMany
     {
         return $this->hasMany(Contacto::class);
     }
 
-    public function contactoPrincipal(): HasOne
+    public function contacto_principal(): HasOne
     {
         return $this->hasOne(Contacto::class)->where('es_contacto_principal', true);
     }
@@ -68,52 +54,22 @@ class Cliente extends Model
         return $this->hasMany(Visita::class);
     }
 
-    // Scopes
-    public function scopePendientes($query)
+    public function cotizaciones(): HasMany
     {
-        return $query->where('estado', 'Pendiente');
+        return $this->hasMany(Cotizacion::class);
     }
 
-    public function scopeVisitados($query)
+    public function pedidos(): HasMany
     {
-        return $query->where('estado', 'Visitado');
+        return $this->hasMany(Pedido::class);
     }
 
-    public function scopePorCotizar($query)
-    {
-        return $query->where('estado', 'Por cotizar');
-    }
-
-    public function scopeCotizados($query)
-    {
-        return $query->where('estado', 'Cotizado');
-    }
-
-    public function scopeAprobados($query)
-    {
-        return $query->where('estado', 'Aprobado');
-    }
-
-    public function scopeRechazados($query)
-    {
-        return $query->where('estado', 'Rechazado');
-    }
-
-    public function scopeActivos($query)
-    {
-        return $query->whereIn('estado', ['Visitado', 'Por cotizar', 'Cotizado', 'Aprobado']);
-    }
-
-    public function scopePotenciales($query)
-    {
-        return $query->whereIn('estado', ['Pendiente', 'Visitado', 'Por cotizar']);
-    }
-
+    // Scopes de búsqueda y filtro
     public function scopeSearch($query, $search)
     {
         return $query->where(function ($q) use ($search) {
             $q->where('razon_social', 'like', "%{$search}%")
-              ->orWhere('codigo', 'like', "%{$search}%")
+              ->orWhere('nombre_comercial', 'like', "%{$search}%")
               ->orWhere('ruc', 'like', "%{$search}%")
               ->orWhere('sector', 'like', "%{$search}%");
         });
@@ -123,12 +79,11 @@ class Cliente extends Model
     public function getEstadoBadgeColorAttribute(): string
     {
         return match($this->estado) {
-            'Pendiente' => 'yellow',
-            'Visitado' => 'blue',
-            'Por cotizar' => 'purple',
-            'Cotizado' => 'orange',
-            'Aprobado' => 'green',
-            'Rechazado' => 'red',
+            'potencial' => 'yellow',
+            'visitado' => 'blue',
+            'cotizado' => 'purple',
+            'cliente' => 'green',
+            'inactivo' => 'gray',
             default => 'gray'
         };
     }
@@ -146,12 +101,11 @@ class Cliente extends Model
     public static function getEstadosOptions(): array
     {
         return [
-            'Pendiente' => 'Pendiente',
-            'Visitado' => 'Visitado',
-            'Por cotizar' => 'Por cotizar',
-            'Cotizado' => 'Cotizado',
-            'Aprobado' => 'Aprobado',
-            'Rechazado' => 'Rechazado',
+            'potencial' => 'Potencial',
+            'visitado' => 'Visitado',
+            'cotizado' => 'Cotizado',
+            'cliente' => 'Cliente',
+            'inactivo' => 'Inactivo',
         ];
     }
 

@@ -13,20 +13,19 @@ return new class extends Migration
     {
         Schema::create('clientes', function (Blueprint $table) {
             $table->id();
-            $table->string('codigo')->unique(); // EMP-000001
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null'); // Vendedor asignado
             $table->string('ruc', 11)->unique();
             $table->string('razon_social');
+            $table->string('nombre_comercial')->nullable();
             $table->string('sector');
-            $table->enum('estado', ['Pendiente', 'Visitado', 'Por cotizar', 'Cotizado', 'Aprobado', 'Rechazado'])->default('Pendiente');
+            $table->string('estado')->default('potencial'); // potencial, visitado, cotizado, cliente, inactivo
             $table->text('notas')->nullable();
             $table->string('telefono')->nullable();
             $table->string('website')->nullable();
             $table->string('direccion')->nullable();
-            $table->enum('tamaño', ['pequeña', 'mediana', 'grande'])->default('mediana');
             $table->decimal('valor_potencial', 10, 2)->nullable();
             $table->integer('probabilidad_cierre')->nullable(); // 0-100
-            $table->json('etiquetas')->nullable();
-            $table->timestamp('fecha_ultimo_contacto')->nullable();
+            $table->timestamp('ultima_actividad')->nullable();
             $table->timestamps();
         });
     }

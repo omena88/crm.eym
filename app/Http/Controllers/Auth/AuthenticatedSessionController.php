@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Providers\RouteServiceProvider;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Inertia\Response;
+use App\Models\User;
 
 class AuthenticatedSessionController extends Controller
 {
@@ -27,13 +29,27 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $request->authenticate();
+        // Demo login logic
+        if ($request->has('rol')) {
+            $rol = $request->input('rol');
+            $user = User::where('rol', $rol)->first();
 
+            if ($user) {
+                Auth::login($user);
+                $request->session()->regenerate();
+                return redirect()->route('dashboard');
+            }
+
+            return back()->withErrors(['rol' => 'No se encontró un usuario con el rol especificado.']);
+        }
+
+        // Original login logic (fallback)
+        $loginRequest = LoginRequest::createFrom($request);
+        $loginRequest->authenticate();
         $request->session()->regenerate();
-
-        return redirect()->intended(route('dashboard', absolute: false));
+        return redirect()->route('dashboard');
     }
 
     /**

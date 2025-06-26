@@ -14,35 +14,20 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $users = [
-            [
-                'name' => 'Administrador CRM',
-                'email' => 'admin@crm.local',
-                'password' => Hash::make('password123'),
-                'email_verified_at' => now(),
-            ],
-            [
-                'name' => 'Juan Carlos Pérez',
-                'email' => 'juan.perez@crm.local',
-                'password' => Hash::make('password123'),
-                'email_verified_at' => now(),
-            ],
-            [
-                'name' => 'María Elena Rodríguez',
-                'email' => 'maria.rodriguez@crm.local',
-                'password' => Hash::make('password123'),
-                'email_verified_at' => now(),
-            ],
-            [
-                'name' => 'Carlos Alberto Méndez',
-                'email' => 'carlos.mendez@crm.local',
-                'password' => Hash::make('password123'),
-                'email_verified_at' => now(),
-            ]
-        ];
+        // Usuario Vendedor
+        User::factory()->create([
+            'name' => 'Vendedor Demo',
+            'email' => 'vendedor@demo.com',
+            'password' => Hash::make('password'),
+            'rol' => 'vendedor',
+        ]);
 
-        foreach ($users as $userData) {
-            User::create($userData);
-        }
+        // Usuario Gerente
+        User::factory()->create([
+            'name' => 'Gerente Demo',
+            'email' => 'gerente@demo.com',
+            'password' => Hash::make('password'),
+            'rol' => 'gerente',
+        ]);
     }
 }

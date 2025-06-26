@@ -20,7 +20,7 @@ class ClienteController extends Controller
      */
     public function index(Request $request): Response
     {
-        $query = Cliente::with(['contactoPrincipal', 'contactos'])
+        $query = Cliente::with(['contacto_principal', 'vendedor'])
             ->when($request->search, function ($query, $search) {
                 $query->search($search);
             })
@@ -36,8 +36,8 @@ class ClienteController extends Controller
         return Inertia::render('Clientes/Index', [
             'clientes' => $clientes,
             'filters' => $request->only(['search', 'estado', 'sector']),
-            'estados' => Cliente::getEstadosOptions(),
-            'sectores' => Cliente::getSectoresOptions(),
+            'estados' => Cliente::distinct()->pluck('estado'),
+            'sectores' => Cliente::distinct()->pluck('sector'),
             'auth' => [
                 'user' => auth()->user()
             ]
@@ -99,6 +99,7 @@ class ClienteController extends Controller
             'cliente' => $cliente,
             'contactos' => $cliente->contactos,
             'visitas' => $cliente->visitas()->latest()->paginate(10),
+            'auth' => ['user' => auth()->user()]
         ]);
     }
 
@@ -295,5 +296,70 @@ class ClienteController extends Controller
 
         return Redirect::route('clientes.index')
             ->with($imported > 0 ? 'success' : 'error', $message);
+    }
+
+    /**
+     * Devuelve una lista simple de clientes para selects.
+     */
+    public function list()
+    {
+        return Cliente::select('id', 'razon_social')->orderBy('razon_social')->get();
+    }
+
+    /**
+     * Muestra el historial de un cliente.
+     */
+    public function historial(Cliente $cliente)
+    {
+        // Cargar relaciones para obtener los datos
+        $cliente->load('contactos', 'vendedor');
+
+        // Obtener visitas
+        $visitas = $cliente->visitas()->with('usuario')->get()->map(function ($visita) {
+            return [
+                'tipo' => 'Visita',
+                'fecha' => $visita->fecha_programada,
+                'titulo' => $visita->titulo,
+                'descripcion' => $visita->objetivos ?? $visita->descripcion,
+                'estado' => $visita->estado,
+                'usuario' => $visita->usuario->name ?? 'N/A',
+                'url' => route('visitas.show', $visita->id),
+            ];
+        });
+
+        // Obtener cotizaciones
+        $cotizaciones = $cliente->cotizaciones()->with('usuario')->get()->map(function ($cotizacion) {
+            return [
+                'tipo' => 'Cotización',
+                'fecha' => $cotizacion->fecha_emision,
+                'titulo' => "Cotización #{$cotizacion->codigo}",
+                'descripcion' => "Monto: S/ " . number_format($cotizacion->monto_total, 2),
+                'estado' => $cotizacion->estado,
+                'usuario' => $cotizacion->usuario->name ?? 'N/A',
+                'url' => route('cotizaciones.show', $cotizacion->id),
+            ];
+        });
+
+        // Obtener pedidos
+        $pedidos = $cliente->pedidos()->with('usuario')->get()->map(function ($pedido) {
+            return [
+                'tipo' => 'Pedido',
+                'fecha' => $pedido->fecha_pedido,
+                'titulo' => "Pedido #{$pedido->codigo}",
+                'descripcion' => "Monto: S/ " . number_format($pedido->monto_total, 2),
+                'estado' => $pedido->estado,
+                'usuario' => $pedido->usuario->name ?? 'N/A',
+                'url' => '#', // No hay ruta para mostrar pedidos aún
+            ];
+        });
+        
+        // Unir y ordenar el historial
+        $historial = $visitas->concat($cotizaciones)->concat($pedidos)->sortByDesc('fecha');
+
+        return Inertia::render('Clientes/Historial', [
+            'cliente' => $cliente,
+            'historial' => $historial->values()->all(),
+            'auth' => ['user' => auth()->user()]
+        ]);
     }
 }

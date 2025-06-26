@@ -1,165 +1,148 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
-import { ref, computed } from 'vue';
-import {
-    PlusIcon,
-    CurrencyDollarIcon,
-    ClipboardDocumentListIcon,
-    ChartBarIcon,
-    UserPlusIcon,
-    DocumentTextIcon,
-    CalendarIcon,
-    UserIcon as UserPlusOutlineIcon
-} from '@heroicons/vue/24/outline';
-import {
-    UserIcon,
+import { Head, Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
+import { 
+    CheckCircleIcon, 
+    DocumentChartBarIcon, 
+    ArchiveBoxIcon, 
     BanknotesIcon,
-    DocumentCheckIcon,
-    MagnifyingGlassIcon,
-    ChevronLeftIcon,
+    ArrowTrendingUpIcon,
+    ArrowTrendingDownIcon,
     ChevronRightIcon
-} from '@heroicons/vue/24/solid';
+} from '@heroicons/vue/24/outline';
 
-// Datos de ejemplo para el dashboard
-const stats = ref([
-    {
-        name: 'Ventas del Mes',
-        value: '$45,678',
-        change: '+8%',
-        changeType: 'increase',
-        icon: BanknotesIcon
-    },
-    {
-        name: 'Leads Pendientes',
-        value: '23',
-        change: '-2%',
-        changeType: 'decrease',
-        icon: MagnifyingGlassIcon
-    },
-    {
-        name: 'Tareas Completadas',
-        value: '87%',
-        change: '+5%',
-        changeType: 'increase',
-        icon: DocumentCheckIcon
-    }
-]);
-
-const recentActivities = ref([
-    {
-        id: 1,
-        type: 'client',
-        message: 'Nuevo cliente registrado: Juan Pérez',
-        time: 'Hace 2 horas'
-    },
-    {
-        id: 2,
-        type: 'sale',
-        message: 'Venta completada por $2,500',
-        time: 'Hace 4 horas'
-    },
-    {
-        id: 3,
-        type: 'task',
-        message: 'Tarea completada: Seguimiento cliente ABC',
-        time: 'Hace 6 horas'
-    },
-    {
-        id: 4,
-        type: 'lead',
-        message: 'Nuevo lead: María García - Interesada en producto X',
-        time: 'Hace 8 horas'
-    }
-]);
-
-// Control de semanas
-const currentWeek = ref(0); // 0 es la semana actual
-
-const getCurrentWeekRange = (weekOffset = 0) => {
-    const now = new Date();
-    const startOfWeek = new Date(now);
-    const dayOfWeek = now.getDay();
-    const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) + (weekOffset * 7);
-    startOfWeek.setDate(diff);
-    
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(startOfWeek.getDate() + 6);
-    
-    return {
-        start: startOfWeek,
-        end: endOfWeek
-    };
-};
-
-const weekRange = computed(() => {
-    const range = getCurrentWeekRange(currentWeek.value);
-    const options = { 
-        day: 'numeric', 
-        month: 'short',
-        timeZone: 'America/Mexico_City'
-    };
-    
-    return {
-        start: range.start.toLocaleDateString('es-ES', options),
-        end: range.end.toLocaleDateString('es-ES', options),
-        year: range.start.getFullYear()
-    };
+const props = defineProps({
+    metricas: Object,
+    graficos: Object,
+    actividades: Object,
+    alertas: Object,
+    visitasProximas: Object,
+    userRole: String,
+    auth: Object
 });
 
-const weekLabel = computed(() => {
-    if (currentWeek.value === 0) return 'Esta semana';
-    if (currentWeek.value === -1) return 'Semana pasada';
-    if (currentWeek.value === 1) return 'Próxima semana';
-    return currentWeek.value < 0 ? `Hace ${Math.abs(currentWeek.value)} semanas` : `En ${currentWeek.value} semanas`;
+const getCambioColor = (valor) => {
+    if (valor > 0) return 'text-green-400';
+    if (valor < 0) return 'text-red-400';
+    return 'text-gray-500';
+};
+
+const metricasUI = computed(() => {
+    if (props.userRole === 'vendedor') {
+        return [
+            {
+                nombre: 'Mis Visitas del Mes',
+                valor: props.metricas.mis_visitas.valor,
+                cambio: props.metricas.mis_visitas.cambio,
+                icono: CheckCircleIcon,
+            },
+            {
+                nombre: 'Cumplimiento de Visitas',
+                valor: `${props.metricas.cumplimiento_visitas.valor}%`,
+                cambio: props.metricas.cumplimiento_visitas.cambio,
+                icono: DocumentChartBarIcon,
+            },
+            {
+                nombre: 'Clientes Visitados',
+                valor: props.metricas.clientes_visitados.valor,
+                cambio: props.metricas.clientes_visitados.cambio,
+                icono: ArchiveBoxIcon,
+            },
+            {
+                nombre: 'Visitas Pendientes',
+                valor: props.metricas.visitas_pendientes.valor,
+                cambio: props.metricas.visitas_pendientes.cambio,
+                icono: BanknotesIcon,
+            }
+        ];
+    } else if (props.userRole === 'gerente') {
+        return [
+            {
+                nombre: 'Equipo de Vendedores',
+                valor: props.metricas.equipo_vendedores.valor,
+                cambio: props.metricas.equipo_vendedores.cambio,
+                icono: CheckCircleIcon,
+            },
+            {
+                nombre: 'Visitas del Equipo',
+                valor: props.metricas.visitas_equipo.valor,
+                cambio: props.metricas.visitas_equipo.cambio,
+                icono: DocumentChartBarIcon,
+            },
+            {
+                nombre: 'Tasa de Cumplimiento',
+                valor: `${props.metricas.tasa_cumplimiento.valor}%`,
+                cambio: props.metricas.tasa_cumplimiento.cambio,
+                icono: ArchiveBoxIcon,
+            },
+            {
+                nombre: 'Aprobaciones Pendientes',
+                valor: props.metricas.aprobaciones_pendientes.valor,
+                cambio: props.metricas.aprobaciones_pendientes.cambio,
+                icono: BanknotesIcon,
+            }
+        ];
+    } else {
+        // Dashboard general (datos de demo)
+        return [
+            {
+                nombre: 'Cumplimiento de Visitas',
+                valor: `${props.metricas.cumplimiento_visitas.valor}%`,
+                cambio: props.metricas.cumplimiento_visitas.cambio,
+                icono: CheckCircleIcon,
+            },
+            {
+                nombre: 'Cotizaciones del Mes',
+                valor: props.metricas.cotizaciones.valor,
+                cambio: props.metricas.cotizaciones.cambio,
+                icono: DocumentChartBarIcon,
+            },
+            {
+                nombre: 'Pedidos Realizados',
+                valor: props.metricas.pedidos.valor,
+                cambio: props.metricas.pedidos.cambio,
+                icono: ArchiveBoxIcon,
+            },
+            {
+                nombre: 'Margen Bruto',
+                valor: `${props.metricas.margen.valor}%`,
+                cambio: props.metricas.margen.cambio,
+                icono: BanknotesIcon,
+            }
+        ];
+    }
 });
-
-const changeWeek = (direction) => {
-    currentWeek.value += direction;
-};
-
-// Datos del gráfico de desempeño
-const currentChartWeek = ref(0);
-
-const getChartWeekRange = (weekOffset = 0) => {
-    const now = new Date();
-    const startOfWeek = new Date(now);
-    const dayOfWeek = now.getDay();
-    const diff = now.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1) + (weekOffset * 7);
-    startOfWeek.setDate(diff);
-    return startOfWeek;
-};
 
 const chartData = computed(() => {
-    const weeks = [];
-    for (let i = 5; i >= 0; i--) {
-        const weekStart = getChartWeekRange(currentChartWeek.value - i);
-        const weekLabel = weekStart.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
-        
-        // Datos de ejemplo
-        const planned = Math.floor(Math.random() * 20) + 10; // 10-30 visitas planificadas
-        const completedPlanned = Math.floor(planned * (0.7 + Math.random() * 0.3)); // 70-100% de las planificadas se realizaron
-        const completedUnplanned = Math.floor(Math.random() * 5) + 1; // 1-5 visitas no planificadas realizadas
-        const totalCompleted = completedPlanned + completedUnplanned;
-        
-        weeks.push({
-            week: weekLabel,
-            planned,
-            completedPlanned,
-            completedUnplanned,
-            totalCompleted
-        });
-    }
-    return weeks;
+    return props.graficos?.visitas_semanales || [];
 });
-
-const changeChartWeek = (direction) => {
-    currentChartWeek.value += direction;
-};
 
 const maxValue = computed(() => {
-    return Math.max(...chartData.value.map(week => Math.max(week.planned, week.totalCompleted)));
+    if (!chartData.value || chartData.value.length === 0) return 10; // Un valor por defecto si no hay datos
+    return Math.max(...chartData.value.map(week => Math.max(week.planificadas, week.total_realizadas))) || 10;
 });
+
+const tituloGrafico = computed(() => {
+    if (props.userRole === 'vendedor') {
+        return 'Mis Visitas Semanales';
+    } else if (props.userRole === 'gerente') {
+        return 'Visitas del Equipo - Semanales';
+    } else {
+        return 'Desempeño de Visitas Semanales';
+    }
+});
+
+const descripcionGrafico = computed(() => {
+    if (props.userRole === 'vendedor') {
+        return 'Mis visitas planificadas vs. realizadas.';
+    } else if (props.userRole === 'gerente') {
+        return 'Visitas del equipo planificadas vs. realizadas.';
+    } else {
+        return 'Comparativa de visitas planificadas vs. realizadas.';
+    }
+});
+
 </script>
 
 <template>
@@ -167,308 +150,141 @@ const maxValue = computed(() => {
 
     <AuthenticatedLayout>
         <template #header>
-            <h2 class="text-xl font-semibold text-gray-100">
-                Dashboard
-            </h2>
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Dashboard de Demo</h2>
         </template>
 
-        <div class="py-8">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <!-- Estadísticas principales con selector de semanas -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                    <!-- Selector de semanas (reemplaza Total Clientes) -->
-                    <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 h-32">
-                        <div class="text-center h-full flex flex-col justify-between">
-                            <div class="flex items-center justify-center space-x-2 mb-2">
-                                <button
-                                    @click="changeWeek(-1)"
-                                    class="p-1 text-gray-400 hover:text-gray-200 hover:bg-gray-800 rounded transition-colors"
-                                >
-                                    <ChevronLeftIcon class="w-4 h-4" />
-                                </button>
-                                
-                                <h3 class="text-sm font-semibold text-gray-100">{{ weekLabel }}</h3>
-                                
-                                <button
-                                    @click="changeWeek(1)"
-                                    class="p-1 text-gray-400 hover:text-gray-200 hover:bg-gray-800 rounded transition-colors"
-                                >
-                                    <ChevronRightIcon class="w-4 h-4" />
-                                </button>
+        <div class="py-12">
+            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+                <!-- Header del Dashboard -->
+                <div class="mb-8 px-4 sm:px-0">
+                    <h1 class="text-2xl font-bold text-gray-100">Dashboard</h1>
+                    <p class="text-gray-400">Bienvenido, {{ auth.user.name }}. Aquí tienes un resumen de tu actividad.</p>
+                </div>
+
+                <!-- 4 Cards de Métricas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div v-for="metrica in metricasUI" :key="metrica.nombre" class="bg-gray-900 border border-gray-800 rounded-lg p-6 flex flex-col justify-between hover:bg-gray-800/50 transition-colors duration-300">
+                        <div class="flex justify-between items-start">
+                            <div class="flex flex-col">
+                                <p class="text-sm font-medium text-gray-400">{{ metrica.nombre }}</p>
+                                <p class="text-3xl font-bold text-gray-100 mt-2">{{ metrica.valor }}</p>
                             </div>
-                            <p class="text-xs text-gray-400 mb-2">
-                                {{ weekRange.start }} - {{ weekRange.end }}
-                            </p>
-                            <div class="h-6 flex items-center justify-center">
-                                <button
-                                    @click="currentWeek = 0"
-                                    class="px-2 py-1 text-xs font-medium text-blue-400 bg-blue-600/10 border border-blue-500/30 rounded hover:bg-blue-600/20 transition-colors"
-                                    v-if="currentWeek !== 0"
-                                >
-                                    Hoy
-                                </button>
+                            <div class="p-3 rounded-full bg-blue-500/10 text-blue-500">
+                                <component :is="metrica.icono" class="h-6 w-6" />
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Otras estadísticas -->
-                    <div
-                        v-for="stat in stats"
-                        :key="stat.name"
-                        class="bg-gray-900 border border-gray-800 rounded-lg p-6 hover:bg-gray-800/50 transition-colors"
-                    >
-                        <div class="flex items-center justify-between">
-                            <div class="flex-1">
-                                <p class="text-sm font-medium text-gray-400">{{ stat.name }}</p>
-                                <p class="text-2xl font-bold text-gray-100">{{ stat.value }}</p>
+                        <div class="mt-4 flex justify-between items-center">
+                            <div class="flex items-center text-xs" :class="getCambioColor(metrica.cambio)">
+                                <ArrowTrendingUpIcon v-if="metrica.cambio > 0" class="h-4 w-4 mr-1"/>
+                                <ArrowTrendingDownIcon v-if="metrica.cambio < 0" class="h-4 w-4 mr-1"/>
+                                <span v-if="metrica.cambio !== 0">{{ Math.abs(metrica.cambio) }}% vs mes anterior</span>
+                                <span v-else>Sin cambios vs mes anterior</span>
                             </div>
-                            <div class="flex flex-col items-end space-y-2">
-                                <component :is="stat.icon" class="w-8 h-8 text-blue-400" />
-                                <span
-                                    :class="[
-                                        'text-sm font-medium',
-                                        stat.changeType === 'increase' ? 'text-blue-400' : 'text-red-400'
-                                    ]"
-                                >
-                                    {{ stat.change }}
-                                </span>
-                            </div>
+                            <Link href="#" class="text-xs font-medium text-blue-500 hover:text-blue-400 flex items-center">
+                                Ver más
+                                <ChevronRightIcon class="h-3 w-3 ml-1" />
+                            </Link>
                         </div>
                     </div>
                 </div>
 
-                <!-- Gráfico de Desempeño y Acciones Rápidas -->
-                <div class="mb-8 grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Gráfico de Desempeño -->
-                    <div class="lg:col-span-2">
-                        <div class="bg-gray-900 border border-gray-800 rounded-lg p-6 h-[500px] flex flex-col">
-                            <div class="flex items-center justify-between mb-6">
-                                <div>
-                                    <h3 class="text-lg font-medium text-gray-100">Desempeño de Visitas</h3>
-                                    <p class="text-sm text-gray-400">Visitas realizadas vs planificadas</p>
-                                </div>
-                                <div class="flex items-center space-x-2">
-                                    <button
-                                        @click="changeChartWeek(-1)"
-                                        class="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800 rounded-md transition-colors"
-                                    >
-                                        <ChevronLeftIcon class="w-4 h-4" />
-                                    </button>
-                                    <span class="text-sm text-gray-400 px-3">Últimas 6 semanas</span>
-                                    <button
-                                        @click="changeChartWeek(1)"
-                                        class="p-2 text-gray-400 hover:text-gray-200 hover:bg-gray-800 rounded-md transition-colors"
-                                    >
-                                        <ChevronRightIcon class="w-4 h-4" />
-                                    </button>
-                                </div>
+                <!-- Gráfico Estilo Monocromático -->
+                <div class="mt-8 bg-slate-900/70 border border-slate-800 rounded-xl p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-semibold text-slate-200">{{ tituloGrafico }}</h3>
+                            <p class="text-sm text-slate-400">{{ descripcionGrafico }}</p>
+                        </div>
+                        <!-- Leyenda -->
+                        <div class="flex items-center space-x-4 text-xs text-slate-400">
+                            <div class="flex items-center">
+                                <div class="w-2.5 h-2.5 bg-slate-500 rounded-full mr-2"></div>
+                                <span>Planificadas</span>
                             </div>
-                            
-                            <!-- Gráfico de barras -->
-                            <div class="flex-1 flex">
-                                <!-- Eje Y -->
-                                <div class="flex flex-col justify-between text-xs text-gray-400 pr-4 h-64">
-                                    <span class="flex items-center">{{ maxValue }}</span>
-                                    <span class="flex items-center">{{ Math.floor(maxValue * 0.75) }}</span>
-                                    <span class="flex items-center">{{ Math.floor(maxValue * 0.5) }}</span>
-                                    <span class="flex items-center">{{ Math.floor(maxValue * 0.25) }}</span>
-                                    <span class="flex items-center">0</span>
-                                </div>
-                                
-                                <!-- Líneas de cuadrícula -->
-                                <div class="ml-12 relative h-64 flex-1">
-                                    <div class="absolute inset-0 flex flex-col justify-between">
-                                        <div class="h-px bg-gray-700"></div>
-                                        <div class="h-px bg-gray-700"></div>
-                                        <div class="h-px bg-gray-700"></div>
-                                        <div class="h-px bg-gray-700"></div>
-                                        <div class="h-px bg-gray-700"></div>
+                            <div class="flex items-center">
+                                <div class="w-2.5 h-2.5 bg-sky-500 rounded-full mr-2"></div>
+                                <span>Realizadas (P)</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-2.5 h-2.5 bg-teal-400 rounded-full mr-2"></div>
+                                <span>Realizadas (E)</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="h-72" v-if="chartData.length > 0">
+                        <div class="grid grid-cols-6 gap-6 h-full">
+                             <div v-for="week in chartData" :key="week.semana" class="relative flex flex-col items-center group text-center">
+                                <!-- Tooltip detallado -->
+                                <div class="absolute bottom-full mb-3 w-44 p-3 bg-slate-800/90 backdrop-blur-sm border border-slate-700 rounded-lg shadow-xl text-left text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none z-10">
+                                    <div class="font-bold text-slate-200 mb-2">{{ week.semana }}</div>
+                                    <div class="space-y-1">
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-400">Planificadas:</span>
+                                            <span class="font-semibold text-slate-200">{{ week.planificadas }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-sky-400">Realizadas (P):</span>
+                                            <span class="font-semibold text-sky-300">{{ week.realizadas_planificadas }}</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span class="text-teal-400">Realizadas (E):</span>
+                                            <span class="font-semibold text-teal-300">{{ week.realizadas_no_planificadas }}</span>
+                                        </div>
+                                        <div class="border-t border-slate-700 my-1.5"></div>
+                                        <div class="flex justify-between">
+                                            <span class="text-slate-400">Total:</span>
+                                            <span class="font-bold text-slate-100">{{ week.total_realizadas }}</span>
+                                        </div>
                                     </div>
-                                    
-                                    <!-- Barras -->
-                                    <div class="flex items-end justify-between h-full pt-2 pb-2">
+                                    <div class="absolute left-1/2 -translate-x-1/2 bottom-[-5px] w-2.5 h-2.5 bg-slate-800 transform rotate-45 border-r border-b border-slate-700"></div>
+                                </div>
+
+                                <!-- Contenedor de las Barras -->
+                                <div class="relative flex items-end space-x-2 h-64 w-full justify-center">
+                                    <!-- Barra 1: Planificadas -->
+                                    <div class="w-1/3 h-full flex items-end">
                                         <div 
-                                            v-for="week in chartData" 
-                                            :key="week.week"
-                                            class="flex flex-col items-center flex-1 mx-1"
-                                        >
-                                            <div class="flex items-end space-x-1 mb-2 h-56">
-                                                <!-- Barra planificadas -->
-                                                <div 
-                                                    class="bg-gray-600/50 w-12 rounded-t-sm relative group cursor-pointer transition-colors hover:bg-gray-600/70"
-                                                    :style="{ height: `${(week.planned / maxValue) * 100}%` }"
-                                                >
-                                                    <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
-                                                        Planificadas: {{ week.planned }}
-                                                    </div>
-                                                </div>
-                                                
-                                                <!-- Barra realizadas (apilada) -->
-                                                <div class="relative w-12 flex flex-col justify-end" :style="{ height: `${(week.totalCompleted / maxValue) * 100}%` }">
-                                                    <!-- Parte superior: Realizadas no planificadas -->
-                                                    <div 
-                                                        class="bg-amber-600 relative group cursor-pointer transition-colors hover:bg-amber-500 rounded-t-sm"
-                                                        :style="{ height: `${(week.completedUnplanned / week.totalCompleted) * 100}%` }"
-                                                    >
-                                                        <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                                            Realizadas no planificadas: {{ week.completedUnplanned }}
-                                                        </div>
-                                                    </div>
-                                                    
-                                                    <!-- Parte inferior: Realizadas planificadas -->
-                                                    <div 
-                                                        class="bg-blue-500 relative group cursor-pointer transition-colors hover:bg-blue-400 rounded-b-sm"
-                                                        :style="{ height: `${(week.completedPlanned / week.totalCompleted) * 100}%` }"
-                                                    >
-                                                        <div class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                                            Realizadas planificadas: {{ week.completedPlanned }}
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                            class="w-full bg-slate-700 rounded-t-md hover:bg-slate-600 transition-colors" 
+                                            :style="{ height: `${(week.planificadas / maxValue) * 100}%` }">
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Barra 2: Stack de Realizadas -->
+                                    <div class="w-1/3 h-full flex flex-col justify-end">
+                                        <div class="relative w-full" :style="{ height: `${(week.total_realizadas / maxValue) * 100}%` }">
+                                            <!-- Realizadas (Extra) -->
+                                            <div 
+                                                v-if="week.realizadas_no_planificadas > 0"
+                                                class="absolute top-0 left-0 w-full bg-teal-500 hover:bg-teal-400 transition-colors rounded-t-md"
+                                                :style="{ height: `${(week.realizadas_no_planificadas / week.total_realizadas) * 100}%` }">
                                             </div>
-                                            
-                                            <!-- Etiqueta de semana -->
-                                            <span class="text-xs text-gray-400 text-center">{{ week.week }}</span>
+                                            <!-- Realizadas (Planificadas) -->
+                                            <div 
+                                                class="absolute bottom-0 left-0 w-full bg-sky-600 hover:bg-sky-500 transition-colors"
+                                                :style="{ height: `${(week.realizadas_planificadas / week.total_realizadas) * 100}%` }"
+                                                :class="{ 'rounded-t-md': week.realizadas_no_planificadas === 0 }">
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                            
-                            <!-- Leyenda -->
-                            <div class="flex justify-center space-x-6 mt-4">
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-gray-600/50 rounded mr-2"></div>
-                                    <span class="text-sm text-gray-400">Planificadas</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-blue-500 rounded mr-2"></div>
-                                    <span class="text-sm text-gray-400">Realizadas planificadas</span>
-                                </div>
-                                <div class="flex items-center">
-                                    <div class="w-3 h-3 bg-amber-600 rounded mr-2"></div>
-                                    <span class="text-sm text-gray-400">Realizadas no planificadas</span>
+                                
+                                <!-- Etiqueta X-Axis -->
+                                <div class="mt-3 text-xs text-slate-400 font-medium border-t border-slate-800 w-full pt-2">
+                                    {{ week.semana }}
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Acciones rápidas y Próximas tareas -->
-                    <div class="flex flex-col space-y-6 h-[500px]">
-                        <!-- Acciones rápidas -->
-                        <div class="bg-gray-900 border border-gray-800 rounded-lg flex-1 flex flex-col">
-                            <div class="p-6 border-b border-gray-800">
-                                <h3 class="text-lg font-medium text-gray-100">Acciones Rápidas</h3>
-                                <p class="text-sm text-gray-400 mt-1">Operaciones frecuentes</p>
-                            </div>
-                            <div class="p-6 flex-1 flex flex-col justify-center">
-                                <div class="space-y-4">
-                                    <button 
-                                        @click="router.visit('/clientes/create')"
-                                        class="w-full flex items-center justify-center px-4 py-4 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg border border-blue-500 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-                                    >
-                                        <UserPlusOutlineIcon class="w-5 h-5 mr-3" />
-                                        <span class="font-semibold">Nuevo Cliente</span>
-                                    </button>
-                                    
-                                    <button 
-                                        @click="router.visit('/contactos/create')"
-                                        class="w-full flex items-center justify-center px-4 py-4 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white text-sm font-medium rounded-lg border border-green-500 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-                                    >
-                                        <UserPlusIcon class="w-5 h-5 mr-3" />
-                                        <span class="font-semibold">Añadir Contacto</span>
-                                    </button>
-                                    
-                                    <button 
-                                        @click="router.visit('/visitas/create')"
-                                        class="w-full flex items-center justify-center px-4 py-4 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white text-sm font-medium rounded-lg border border-purple-500 shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105"
-                                    >
-                                        <CalendarIcon class="w-5 h-5 mr-3" />
-                                        <span class="font-semibold">Registrar Visita</span>
-                                    </button>
-                                    
-                                    <button 
-                                        @click="alert('Funcionalidad en desarrollo')"
-                                        disabled
-                                        class="w-full flex items-center justify-center px-4 py-4 bg-gray-800 text-gray-400 text-sm font-medium rounded-lg border border-gray-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed relative"
-                                    >
-                                        <DocumentTextIcon class="w-5 h-5 mr-3" />
-                                        <span class="font-semibold">Generar Cotización</span>
-                                        <span class="absolute -top-1 -right-1 px-2 py-1 text-xs bg-amber-600 text-white rounded-full">Pronto</span>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Próximas tareas -->
-                        <div class="bg-gray-900 border border-gray-800 rounded-lg flex-1 flex flex-col">
-                            <div class="p-6 border-b border-gray-800">
-                                <h3 class="text-lg font-medium text-gray-100">Próximas Tareas</h3>
-                                <p class="text-sm text-gray-400 mt-1">Pendientes de hoy</p>
-                            </div>
-                            <div class="p-6 flex-1">
-                                <div class="space-y-4">
-                                    <div class="flex items-start space-x-3 p-3 bg-gray-800/30 rounded-md hover:bg-gray-800/50 transition-colors">
-                                        <input type="checkbox" class="h-4 w-4 mt-1 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
-                                        <div class="flex-1">
-                                            <span class="text-sm font-medium text-gray-100">Llamar a cliente ABC Corp</span>
-                                            <p class="text-xs text-gray-400 mt-1">Seguimiento de propuesta - Vence en 2 horas</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-start space-x-3 p-3 bg-gray-800/30 rounded-md hover:bg-gray-800/50 transition-colors">
-                                        <input type="checkbox" class="h-4 w-4 mt-1 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
-                                        <div class="flex-1">
-                                            <span class="text-sm font-medium text-gray-100">Enviar propuesta XYZ</span>
-                                            <p class="text-xs text-gray-400 mt-1">Revisión final - Vence mañana</p>
-                                        </div>
-                                    </div>
-                                    <div class="flex items-start space-x-3 p-3 bg-gray-800/30 rounded-md hover:bg-gray-800/50 transition-colors">
-                                        <input type="checkbox" checked class="h-4 w-4 mt-1 text-blue-600 bg-gray-800 border-gray-600 rounded focus:ring-blue-500 focus:ring-2">
-                                        <div class="flex-1">
-                                            <span class="text-sm text-gray-400 line-through">Actualizar base de datos</span>
-                                            <p class="text-xs text-gray-500 mt-1">Completado hace 1 hora</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                    
+                    <div v-else class="h-72 flex items-center justify-center">
+                        <div class="text-slate-500">No hay datos disponibles</div>
                     </div>
                 </div>
 
-                <!-- Grid principal -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    <!-- Actividad reciente -->
-                    <div class="lg:col-span-2">
-                        <div class="bg-gray-900 border border-gray-800 rounded-lg">
-                            <div class="p-6 border-b border-gray-800">
-                                <h3 class="text-lg font-medium text-gray-100">Actividad Reciente</h3>
-                            </div>
-                            <div class="p-6">
-                                <div class="space-y-4">
-                                    <div
-                                        v-for="activity in recentActivities"
-                                        :key="activity.id"
-                                        class="flex items-center space-x-4 p-4 bg-gray-800/50 rounded-md border border-gray-800"
-                                    >
-                                        <div
-                                            :class="[
-                                                'w-2 h-2 rounded-full',
-                                                activity.type === 'client' ? 'bg-blue-500' :
-                                                activity.type === 'sale' ? 'bg-green-500' :
-                                                activity.type === 'task' ? 'bg-yellow-500' : 'bg-purple-500'
-                                            ]"
-                                        ></div>
-                                        <div class="flex-1">
-                                            <p class="text-sm text-gray-100">{{ activity.message }}</p>
-                                            <p class="text-xs text-gray-400">{{ activity.time }}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Área vacía para mantener proporción -->
-                    <div></div>
+                <!-- Mensaje de sesión -->
+                <div class="mt-8 bg-gray-900 border border-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                    <div class="p-6 text-gray-400">¡Has iniciado sesión correctamente!</div>
                 </div>
             </div>
         </div>

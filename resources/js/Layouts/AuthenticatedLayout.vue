@@ -77,31 +77,30 @@ const navigationItems = [
                             </div>
 
                             <!-- Desktop Navigation Links -->
-                            <div class="hidden space-x-2 sm:-my-px sm:ml-10 sm:flex">
-                                <template v-for="item in navigationItems" :key="item.name">
-                                    <NavLink
-                                        v-if="!item.disabled"
-                                        :href="item.href === '#' ? '#' : route(item.href)"
-                                        :active="route().current(item.current)"
-                                        class="inline-flex items-center px-3 py-2 border-b-2 text-sm font-medium transition-all duration-200"
-                                        :class="route().current(item.current) 
-                                            ? 'border-blue-500 text-white bg-gray-900/50' 
-                                            : 'border-transparent text-gray-400 hover:text-gray-300 hover:border-gray-700 hover:bg-gray-900/30'"
-                                    >
-                                        {{ item.name }}
-                                    </NavLink>
-                                    <div
-                                        v-else
-                                        class="inline-flex items-center px-3 py-2 border-b-2 border-transparent text-sm font-medium text-gray-600 cursor-not-allowed"
-                                    >
-                                        {{ item.name }}
-                                    </div>
-                                </template>
+                            <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                                <NavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                                    Dashboard
+                                </NavLink>
+                                 <NavLink :href="route('clientes.index')" :active="route().current('clientes.index')">
+                                    Clientes
+                                </NavLink>
+                                <NavLink :href="route('visitas.index')" :active="route().current('visitas.index')">
+                                    Visitas
+                                </NavLink>
+                                <NavLink :href="route('cotizaciones.index')" :active="route().current('cotizaciones.index')">
+                                    Cotizaciones
+                                </NavLink>
+                                <NavLink :href="route('pedidos.index')" :active="route().current('pedidos.index')">
+                                    Pedidos
+                                </NavLink>
+                                <NavLink :href="route('productos.index')" :active="route().current('productos.index')">
+                                    Productos
+                                </NavLink>
                             </div>
                         </div>
 
                         <!-- Desktop User Menu -->
-                        <div class="hidden sm:flex sm:items-center sm:space-x-4">
+                        <div class="hidden sm:flex sm:items-center sm:ms-6">
                             <!-- Notificaciones -->
                             <button class="p-2 text-gray-400 hover:text-gray-300 hover:bg-gray-800 rounded-full transition-colors relative">
                                 <BellIcon class="w-5 h-5" />
@@ -203,31 +202,28 @@ const navigationItems = [
                     class="sm:hidden absolute top-16 left-0 right-0 bg-gray-950 border-t border-gray-800 shadow-xl z-40"
                     style="min-height: calc(100vh - 4rem);"
                 >
-                    <!-- Mobile Navigation Links -->
-                    <div class="px-4 pt-6 pb-4 space-y-2">
-                        <template v-for="item in navigationItems" :key="item.name">
-                            <ResponsiveNavLink
-                                v-if="!item.disabled"
-                                :href="item.href === '#' ? '#' : route(item.href)"
-                                :active="route().current(item.current)"
-                                @click="closeNavigation"
-                                class="flex items-center px-4 py-3 border-l-4 text-base font-medium transition-all duration-200 rounded-r-lg"
-                                :class="route().current(item.current)
-                                    ? 'border-blue-500 text-white bg-gray-900 shadow-lg'
-                                    : 'border-transparent text-gray-400 hover:text-gray-300 hover:bg-gray-900/50 hover:border-gray-700'"
-                            >
-                                {{ item.name }}
-                            </ResponsiveNavLink>
-                            <div
-                                v-else
-                                class="flex items-center px-4 py-3 border-l-4 border-transparent text-base font-medium text-gray-600 cursor-not-allowed rounded-r-lg"
-                            >
-                                {{ item.name }}
-                            </div>
-                        </template>
+                    <div class="pt-2 pb-3 space-y-1">
+                        <ResponsiveNavLink :href="route('dashboard')" :active="route().current('dashboard')">
+                            Dashboard
+                        </ResponsiveNavLink>
+                         <ResponsiveNavLink :href="route('clientes.index')" :active="route().current('clientes.index')">
+                            Clientes
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('visitas.index')" :active="route().current('visitas.index')">
+                            Visitas
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('cotizaciones.index')" :active="route().current('cotizaciones.index')">
+                            Cotizaciones
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('pedidos.index')" :active="route().current('pedidos.index')">
+                            Pedidos
+                        </ResponsiveNavLink>
+                        <ResponsiveNavLink :href="route('productos.index')" :active="route().current('productos.index')">
+                            Productos
+                        </ResponsiveNavLink>
                     </div>
 
-                    <!-- Mobile User Section -->
+                    <!-- Responsive Settings Options -->
                     <div class="pt-4 pb-6 border-t border-gray-800" v-if="page.props.auth && page.props.auth.user">
                         <!-- User Info -->
                         <div class="px-4 mb-4">

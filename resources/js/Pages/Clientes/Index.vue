@@ -15,7 +15,8 @@ import {
     UserIcon,
     PhoneIcon,
     EnvelopeIcon,
-    BuildingOfficeIcon
+    BuildingOfficeIcon,
+    ClockIcon
 } from '@heroicons/vue/24/outline';
 import {
     CheckIcon,
@@ -25,8 +26,8 @@ import {
 const props = defineProps({
     clientes: Object,
     filters: Object,
-    estados: Object,
-    sectores: Object,
+    estados: Array,
+    sectores: Array,
 });
 
 // Filtros
@@ -94,12 +95,11 @@ const importClientes = () => {
 // Función para obtener color del estado
 const getEstadoBadgeColor = (estado) => {
     const colors = {
-        'Pendiente': 'bg-yellow-100 text-yellow-800 border-yellow-300',
-        'Visitado': 'bg-blue-100 text-blue-800 border-blue-300',
-        'Por cotizar': 'bg-purple-100 text-purple-800 border-purple-300',
-        'Cotizado': 'bg-orange-100 text-orange-800 border-orange-300',
-        'Aprobado': 'bg-green-100 text-green-800 border-green-300',
-        'Rechazado': 'bg-red-100 text-red-800 border-red-300',
+        'potencial': 'bg-yellow-100 text-yellow-800 border-yellow-300',
+        'visitado': 'bg-blue-100 text-blue-800 border-blue-300',
+        'cotizado': 'bg-purple-100 text-purple-800 border-purple-300',
+        'cliente': 'bg-green-100 text-green-800 border-green-300',
+        'inactivo': 'bg-gray-100 text-gray-800 border-gray-300',
     };
     return colors[estado] || 'bg-gray-100 text-gray-800 border-gray-300';
 };
@@ -166,7 +166,7 @@ const deleteCliente = (cliente) => {
                                 <input
                                     v-model="filters.search"
                                     type="text"
-                                    placeholder="Buscar por razón social, RUC o código..."
+                                    placeholder="Buscar por razón social, RUC o sector..."
                                     class="block w-full pl-10 pr-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                                 />
                             </div>
@@ -213,8 +213,8 @@ const deleteCliente = (cliente) => {
                                     class="block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                                 >
                                     <option value="">Todos los estados</option>
-                                    <option v-for="(label, value) in estados" :key="value" :value="value">
-                                        {{ label }}
+                                    <option v-for="estado in estados" :key="estado" :value="estado">
+                                        {{ estado }}
                                     </option>
                                 </select>
                             </div>
@@ -226,8 +226,8 @@ const deleteCliente = (cliente) => {
                                     class="block w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-md text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                                 >
                                     <option value="">Todos los sectores</option>
-                                    <option v-for="(label, value) in sectores" :key="value" :value="value">
-                                        {{ label }}
+                                    <option v-for="sector in sectores" :key="sector" :value="sector">
+                                        {{ sector }}
                                     </option>
                                 </select>
                             </div>
@@ -252,7 +252,7 @@ const deleteCliente = (cliente) => {
                             <thead class="bg-gray-800">
                                 <tr>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        Cliente
+                                        Cliente / Vendedor
                                     </th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                                         Contacto Principal
@@ -263,7 +263,7 @@ const deleteCliente = (cliente) => {
                                     <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                                         Estado
                                     </th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
                                         Acciones
                                     </th>
                                 </tr>
@@ -276,14 +276,17 @@ const deleteCliente = (cliente) => {
                                                 {{ cliente.razon_social }}
                                             </div>
                                             <div class="text-sm text-gray-400">
-                                                {{ cliente.codigo }} • RUC: {{ cliente.ruc }}
+                                                RUC: {{ cliente.ruc }}
+                                            </div>
+                                            <div v-if="cliente.vendedor" class="text-xs text-gray-500 mt-1">
+                                                Vendedor: {{ cliente.vendedor.name }}
                                             </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4">
                                         <div v-if="cliente.contacto_principal">
                                             <div class="text-sm font-medium text-gray-100">
-                                                {{ cliente.contacto_principal.nombre_completo }}
+                                                {{ cliente.contacto_principal.nombre }} {{ cliente.contacto_principal.apellidos }}
                                             </div>
                                             <div v-if="cliente.contacto_principal.puesto" class="text-sm text-gray-400">
                                                 {{ cliente.contacto_principal.puesto }}
@@ -306,11 +309,25 @@ const deleteCliente = (cliente) => {
                                     <td class="px-6 py-4 text-right text-sm font-medium">
                                         <div class="flex items-center justify-end space-x-2">
                                             <Link
+                                                :href="route('clientes.show', cliente.id)"
+                                                class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-200"
+                                                title="Ver"
+                                            >
+                                                <EyeIcon class="w-4 h-4" />
+                                            </Link>
+                                            <Link
                                                 :href="route('clientes.edit', cliente.id)"
-                                                class="text-yellow-400 hover:text-yellow-300 transition-colors p-1"
+                                                class="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
                                                 title="Editar"
                                             >
                                                 <PencilIcon class="w-4 h-4" />
+                                            </Link>
+                                            <Link
+                                                :href="route('clientes.historial', cliente.id)"
+                                                class="text-teal-600 hover:text-teal-900 dark:text-teal-400 dark:hover:text-teal-200"
+                                                title="Historial"
+                                            >
+                                                <ClockIcon class="h-5 w-5" />
                                             </Link>
                                             <button
                                                 @click="deleteCliente(cliente)"
@@ -333,17 +350,18 @@ const deleteCliente = (cliente) => {
                                 Mostrando {{ clientes.from }} - {{ clientes.to }} de {{ clientes.total }} clientes
                             </div>
                             <nav class="flex items-center space-x-2">
-                                <Link
-                                    v-for="link in clientes.links"
-                                    :key="link.label"
+                                <component
+                                    v-for="(link, index) in clientes.links"
+                                    :key="index"
+                                    :is="link.url ? 'Link' : 'span'"
                                     :href="link.url"
                                     v-html="link.label"
-                                    :class="[
-                                        'px-3 py-2 text-sm font-medium rounded-md transition-colors',
-                                        link.active
-                                            ? 'bg-blue-600 text-white border border-blue-500'
-                                            : 'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600'
-                                    ]"
+                                    class="px-3 py-2 text-sm font-medium rounded-md transition-colors"
+                                    :class="{
+                                        'bg-blue-600 text-white border border-blue-500': link.active,
+                                        'bg-gray-700 text-gray-300 border border-gray-600 hover:bg-gray-600': !link.active && link.url,
+                                        'bg-gray-700 text-gray-500 border border-gray-600 cursor-not-allowed': !link.url
+                                    }"
                                 />
                             </nav>
                         </div>
@@ -425,7 +443,7 @@ const deleteCliente = (cliente) => {
                         <button
                             type="button"
                             @click="importModal = false"
-                            class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 transition-colors"
+                            class="px-4 py-2 text-sm font-medium text-gray-300 bg-gray-700 border border-gray-600 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500"
                         >
                             Cancelar
                         </button>

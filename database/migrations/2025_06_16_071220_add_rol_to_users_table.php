@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->enum('rol', ['vendedor', 'gerente', 'calidad'])->default('vendedor')->after('email');
+            $table->string('rol', 50)->default('vendedor');
+            $table->string('rol_original', 50)->nullable(); // Para que admin pueda volver a su rol original
         });
     }
 
@@ -22,7 +23,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('rol');
+            $table->dropColumn(['rol', 'rol_original']);
         });
     }
 };

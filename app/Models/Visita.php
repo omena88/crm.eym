@@ -14,30 +14,55 @@ class Visita extends Model
     protected $fillable = [
         'cliente_id',
         'user_id',
+        'gerente_id',
         'titulo',
         'descripcion',
+        'objetivos',
         'fecha_programada',
-        'fecha_realizada',
-        'estado',
-        'tipo',
-        'notas',
-        'resultado',
-        'requiere_seguimiento',
-        'fecha_siguiente_contacto',
-        'prioridad',
         'duracion_estimada',
         'duracion_real',
+        'tipo',
+        'estado',
+        'fecha_realizada',
+        'resultado',
+        'notas',
+        'comentarios',
         'satisfaccion_cliente',
-        'objetivos_alcanzados'
+        'objetivos_alcanzados',
+        'requiere_seguimiento',
+        'fecha_siguiente_contacto',
+        'semana',
+        'año',
+        'fecha_aprobacion',
+        'fecha_envio_aprobacion',
+        'comentarios_gerente',
+        // Campos legacy para compatibilidad
+        'resumen_visita',
+        'acuerdos',
+        'proximos_pasos',
+        'probabilidad_cierre',
+        'valor_estimado',
+        'prioridad',
+        'turno',
+        // Campos para clasificación
+        'tipo_planificacion' // 'planificada' o 'no_planificada'
     ];
 
     protected $casts = [
-        'fecha_programada' => 'datetime',
+        'fecha_programada' => 'datetime:Y-m-d',
         'fecha_realizada' => 'datetime',
+        'fecha_aprobacion' => 'datetime',
+        'fecha_envio_aprobacion' => 'datetime',
         'fecha_siguiente_contacto' => 'date',
         'requiere_seguimiento' => 'boolean',
+        'objetivos_alcanzados' => 'boolean',
         'satisfaccion_cliente' => 'integer',
-        'objetivos_alcanzados' => 'boolean'
+        'duracion_estimada' => 'integer',
+        'duracion_real' => 'integer',
+        'semana' => 'integer',
+        'año' => 'integer',
+        'probabilidad_cierre' => 'decimal:2',
+        'valor_estimado' => 'decimal:2'
     ];
 
     // Relaciones
@@ -249,5 +274,19 @@ class Visita extends Model
             'fecha_programada' => $nuevaFecha,
             'estado' => 'programada',
         ]);
+    }
+
+    // Eventos del modelo para asegurar que semana y año se actualicen
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::saving(function ($visita) {
+            if ($visita->fecha_programada) {
+                $fecha = Carbon::parse($visita->fecha_programada);
+                $visita->semana = $fecha->week;
+                $visita->año = $fecha->year;
+            }
+        });
     }
 }

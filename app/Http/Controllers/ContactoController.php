@@ -58,6 +58,7 @@ class ContactoController extends Controller
                 'filters' => $request->only(['search', 'cliente_id', 'es_principal']),
                 'sort' => $request->only(['sort_by', 'sort_direction']),
                 'clientes' => $clientes,
+                'auth' => ['user' => auth()->user()]
             ]);
 
         } catch (\Exception $e) {
@@ -69,7 +70,8 @@ class ContactoController extends Controller
                 'filters' => [],
                 'sort' => [],
                 'clientes' => collect(),
-                'error' => 'Error al cargar los contactos. Por favor, inténtalo de nuevo.'
+                'error' => 'Error al cargar los contactos. Por favor, inténtalo de nuevo.',
+                'auth' => ['user' => auth()->user()]
             ]);
         }
     }
@@ -125,6 +127,7 @@ class ContactoController extends Controller
 
         return Inertia::render('Contactos/Show', [
             'contacto' => $contacto,
+            'auth' => ['user' => auth()->user()]
         ]);
     }
 
@@ -137,6 +140,7 @@ class ContactoController extends Controller
 
         return Inertia::render('Contactos/Edit', [
             'contacto' => $contacto,
+            'auth' => ['user' => auth()->user()]
         ]);
     }
 

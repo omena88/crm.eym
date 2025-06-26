@@ -15,7 +15,7 @@ class User extends Authenticatable
     /**
      * The attributes that are mass assignable.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -27,7 +27,7 @@ class User extends Authenticatable
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var list<string>
+     * @var array<int, string>
      */
     protected $hidden = [
         'password',
@@ -45,5 +45,36 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    /**
+     * Verifica si el usuario tiene el rol de gerente.
+     */
+    public function esGerente(): bool
+    {
+        return $this->rol === 'gerente';
+    }
+
+    /**
+     * Verifica si el usuario tiene el rol de vendedor.
+     */
+    public function esVendedor(): bool
+    {
+        return $this->rol === 'vendedor';
+    }
+
+    public function visitas()
+    {
+        return $this->hasMany(Visita::class);
+    }
+
+    public function cotizaciones()
+    {
+        return $this->hasMany(Cotizacion::class);
+    }
+
+    public function pedidos()
+    {
+        return $this->hasMany(Pedido::class);
     }
 }
