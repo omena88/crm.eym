@@ -4,6 +4,7 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
+RUN npm run build
 
 # Stage 2: Final production image
 FROM php:8.2-fpm-alpine
@@ -25,8 +26,8 @@ RUN composer install --no-dev --no-interaction --no-scripts --prefer-dist
 # Copia el resto del código
 COPY . .
 
-# Build de frontend (ahora que vendor/ziggy existe)
-RUN npm install && npm run build
+# Copia los assets ya construidos
+COPY --from=frontend /app/public/build /var/www/html/public/build
 
 # Copia los archivos de configuración
 COPY dockerfiles/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
