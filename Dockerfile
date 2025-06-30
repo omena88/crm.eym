@@ -1,12 +1,19 @@
-# Stage 1: Build frontend assets
+# Stage 1: Instala dependencias PHP (vendor)
+FROM composer:2.5 as vendor
+WORKDIR /app
+COPY composer.json composer.lock ./
+RUN composer install --no-dev --no-interaction --no-scripts --prefer-dist
+
+# Stage 2: Build frontend assets
 FROM node:18-alpine as frontend
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm install
 COPY . .
+COPY --from=vendor /app/vendor /app/vendor
 RUN npm run build
 
-# Stage 2: Final production image
+# Stage 3: Final production image
 FROM php:8.2-fpm-alpine
 
 RUN apk add --no-cache nginx supervisor curl mysql-client libzip-dev zip freetype-dev libpng-dev libjpeg-turbo-dev \
@@ -23,6 +30,7 @@ ENV COMPOSER_MEMORY_LIMIT=-1
 # Copia solo los archivos necesarios para instalar dependencias
 COPY composer.json composer.lock ./
 COPY database/ database/
+COPY --from=vendor /app/vendor ./vendor
 RUN composer install --no-dev --no-interaction --no-scripts --prefer-dist
 
 # Copia el resto del código
