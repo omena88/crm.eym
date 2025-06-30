@@ -25,13 +25,13 @@ RUN apk add --no-cache nginx supervisor curl mysql-client libzip-dev zip \
 RUN mkdir -p /var/run/php /etc/supervisor/conf.d
 
 # Configure PHP-FPM
-COPY docker/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
+COPY dockerfiles/php-fpm.conf /usr/local/etc/php-fpm.d/www.conf
 
 # Configure Nginx
-COPY docker/nginx.conf /etc/nginx/http.d/default.conf
+COPY dockerfiles/nginx.conf /etc/nginx/http.d/default.conf
 
 # Configure Supervisor
-COPY docker/supervisor.conf /etc/supervisor/conf.d/laravel.conf
+COPY dockerfiles/supervisor.conf /etc/supervisor/conf.d/laravel.conf
 
 WORKDIR /var/www/html
 
@@ -47,7 +47,7 @@ RUN chown -R www-data:www-data /var/www/html/storage /var/www/html/bootstrap/cac
 EXPOSE 80
 
 # Use an entrypoint script to run migrations and start services
-COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
+COPY dockerfiles/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"] 
