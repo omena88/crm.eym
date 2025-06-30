@@ -18,6 +18,8 @@ COPY --from=composer:2.5 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /var/www/html
 
+ENV COMPOSER_MEMORY_LIMIT=-1
+
 # Copia solo los archivos necesarios para instalar dependencias
 COPY composer.json composer.lock ./
 COPY database/ database/

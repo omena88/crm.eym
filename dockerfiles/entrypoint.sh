@@ -10,6 +10,7 @@ done
 echo "Database is ready."
 
 # Run Laravel setup commands
+php artisan storage:link || true
 php artisan migrate --force
 php artisan optimize:clear
 
