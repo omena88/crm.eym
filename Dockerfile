@@ -18,8 +18,9 @@ RUN npm run build
 FROM php:8.2-fpm-alpine
 
 # Install system dependencies: Nginx for web server, Supervisor for process management
-RUN apk add --no-cache nginx supervisor curl mysql-client libzip-dev zip \
-    && docker-php-ext-install pdo pdo_mysql zip bcmath opcache
+RUN apk add --no-cache nginx supervisor curl mysql-client libzip-dev zip freetype-dev libpng-dev libjpeg-turbo-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql zip bcmath opcache gd
 
 # Create necessary directories and configurations
 RUN mkdir -p /var/run/php /etc/supervisor/conf.d
